@@ -9,8 +9,11 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.imageio.ImageIO;
 
 /**
@@ -24,9 +27,8 @@ public class HumanDetectionCV {
      */
     public static void main(String[] args) throws IOException {
         // TODO code application logic here
-        
-        //convert color image into 2d matrix of grayscale values 
-        
+ 
+        Map<Double[], Double> train = new HashMap<>();
         File path = new File("C:\\Users\\RMANGLaNI\\Desktop\\Human\\Train_Positive");
         File[] files = path.listFiles();
         for(File f : files){
@@ -34,13 +36,40 @@ public class HumanDetectionCV {
             int[][] vert = verticalGradient(imageMatrix);
             int[][] horiz = horizontalGradient(imageMatrix);
             HOGDescriptor hog = new HOGDescriptor(edgeMagnitude(vert, horiz), edgeDegree(vert, horiz));
-            List<Double> hogDesc = hog.getHOGDesc();
-            System.out.println(f + " " + hogDesc.size());
-//            for(Double d : hogDesc){
-//                System.out.print(d +" ");
-//            }
+            List<Double> hogDesc  = hog.getHOGDesc();
+            Double[] imageIn = new Double[hogDesc.size()];
+            for(int i =0; i<imageIn.length; i++){
+                imageIn[i] = hogDesc.get(i);
+            }
+            train.put(imageIn, 1.0);
         }
+        
+        File path2 = new File("C:\\Users\\RMANGLaNI\\Desktop\\Human\\Train_Negative");
+        File[] files2 = path2.listFiles();
+        for(File f : files2){
+            int[][] imageMatrix = getGrayscaleMatrix(f);
+            int[][] vert = verticalGradient(imageMatrix);
+            int[][] horiz = horizontalGradient(imageMatrix);
+            HOGDescriptor hog = new HOGDescriptor(edgeMagnitude(vert, horiz), edgeDegree(vert, horiz));
+            List<Double> hogDesc  = hog.getHOGDesc();
+            Double[] imageIn = new Double[hogDesc.size()];
+            
+            for(int i =0; i<imageIn.length; i++){
+                imageIn[i] = hogDesc.get(i);
+            }
+            train.put(imageIn, 0.0);
+        }
+        
+        NeuralNetwork nn = new NeuralNetwork(train, 0.001, 250,7524);
+        nn.trainNetwork();
 
+    }
+    
+    public static void printMat(Double[] mat){
+        for(int i=0; i<mat.length; i++){
+            System.out.print(mat[i] + " ");
+        }
+        System.out.println("");
     }
     
     public static int[][] getGrayscaleMatrix(File f) throws IOException{

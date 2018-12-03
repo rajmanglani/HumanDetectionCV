@@ -48,15 +48,15 @@ public class HOGDescriptor {
                 //for each cell 
                 int[][] cellMag = new int[8][8];
                 int[][] cellDeg = new int[8][8];
-                int cellStartI = i*8,  cellStartJ = j*8;
+                int cellStartI = i*8; 
                 for(int k=0; k<8; k++){
+                    int cellStartJ = j*8;
                     for(int m=0; m<8; m++){
                         cellMag[k][m] = edgeMag[cellStartI][cellStartJ];
                         cellDeg[k][m] = edgeDeg[cellStartI][cellStartJ];
                         cellStartJ++;
                     }
                     cellStartI++;
-                    cellStartJ = j*8;
                 }
                 cellHistograms.put(id, genHistogramForCell(cellMag, cellDeg));
                 id++;
